@@ -549,7 +549,7 @@
       function formatLitres(l) {
         if (l >= 100) return formatNumber(l, 0) + " L";
         if (l >= 1) return formatNumber(l, 2) + " L";
-        if (l >= 0.01) return formatNumber(l, 3) + " L";
+        if (l >= 0.1) return formatNumber(l, 3) + " L";
         return formatNumber(l * 1000, 1) + " mL";
       }
 
