@@ -174,28 +174,36 @@
       gap: 0.85rem;
     }
 
-    details.advanced {
+    .advanced {
       margin-top: 0.5rem;
       border-top: 1px solid var(--line);
       padding-top: 0.85rem;
     }
 
-    details.advanced summary {
+    .advanced-toggle {
       cursor: pointer;
+      font: inherit;
       font-weight: 600;
       color: var(--slate);
-      list-style: none;
       display: flex;
       align-items: center;
       gap: 0.4rem;
       user-select: none;
+      padding: 0.55rem 0.65rem;
+      margin: -0.35rem -0.35rem 0;
+      border-radius: 8px;
+      min-height: 2.5rem;
+      width: 100%;
+      text-align: left;
+      background: transparent;
+      border: none;
     }
 
-    details.advanced summary::-webkit-details-marker {
-      display: none;
+    .advanced-toggle:hover {
+      background: rgba(61, 90, 108, 0.06);
     }
 
-    details.advanced summary::before {
+    .advanced-toggle::before {
       content: "";
       width: 0.45rem;
       height: 0.45rem;
@@ -203,15 +211,21 @@
       border-bottom: 2px solid var(--slate);
       transform: rotate(-45deg);
       transition: transform 0.2s ease;
+      flex-shrink: 0;
     }
 
-    details.advanced[open] summary::before {
+    .advanced.is-open .advanced-toggle::before {
       transform: rotate(45deg);
     }
 
-    details.advanced .advanced-body {
+    .advanced-body {
+      display: none;
       margin-top: 1rem;
       animation: fadeSlide 0.35s ease both;
+    }
+
+    .advanced.is-open .advanced-body {
+      display: block;
     }
 
     /* —— Results —— */
@@ -424,9 +438,11 @@
             <input type="number" id="vehicles" name="vehicles" min="0" step="1" value="2000" required />
           </div>
 
-          <details class="advanced">
-            <summary>Paramètres avancés</summary>
-            <div class="advanced-body">
+          <div class="advanced" id="advanced">
+            <button type="button" class="advanced-toggle" id="advanced-toggle" aria-expanded="false" aria-controls="advanced-body">
+              Paramètres avancés
+            </button>
+            <div class="advanced-body" id="advanced-body" hidden>
               <div class="field">
                 <label for="mass">Masse moyenne du véhicule <span class="hint">kg — défaut 1450</span></label>
                 <input type="number" id="mass" name="mass" min="1" step="any" value="1450" />
@@ -436,7 +452,7 @@
                 <input type="number" id="efficiency" name="efficiency" min="1" max="100" step="any" value="28" />
               </div>
             </div>
-          </details>
+          </div>
         </form>
       </section>
 
@@ -625,6 +641,15 @@
 
       ["v1", "v2", "vehicles", "mass", "efficiency"].forEach(function (id) {
         els[id].addEventListener("input", calculate);
+      });
+
+      const advanced = document.getElementById("advanced");
+      const advancedToggle = document.getElementById("advanced-toggle");
+      const advancedBody = document.getElementById("advanced-body");
+      advancedToggle.addEventListener("click", function () {
+        const open = advanced.classList.toggle("is-open");
+        advancedToggle.setAttribute("aria-expanded", open ? "true" : "false");
+        advancedBody.hidden = !open;
       });
 
       calculate();
