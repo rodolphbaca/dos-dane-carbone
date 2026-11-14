@@ -1,0 +1,634 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Dos d’âne carbone — coût énergétique et CO₂</title>
+  <meta name="description" content="Estimez l’énergie et les émissions CO₂ dues à la réaccélération après un dos d’âne." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <style>
+    :root {
+      --ink: #1a2b24;
+      --ink-muted: #4a5c54;
+      --paper: #f3f6f2;
+      --paper-deep: #e4ebe3;
+      --accent: #2f6b4f;
+      --accent-deep: #1e4a36;
+      --slate: #3d5a6c;
+      --highlight: #c8e0d2;
+      --warn: #8a4b1f;
+      --line: rgba(26, 43, 36, 0.12);
+      --radius: 14px;
+      --shadow: 0 12px 40px rgba(26, 43, 36, 0.08);
+      --font-display: "Fraunces", Georgia, serif;
+      --font-body: "Source Sans 3", "Segoe UI", sans-serif;
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      font-family: var(--font-body);
+      color: var(--ink);
+      background:
+        radial-gradient(ellipse 80% 50% at 10% -10%, rgba(47, 107, 79, 0.14), transparent 55%),
+        radial-gradient(ellipse 60% 40% at 100% 0%, rgba(61, 90, 108, 0.12), transparent 50%),
+        linear-gradient(165deg, #f7faf6 0%, var(--paper) 45%, #eef3f0 100%);
+      line-height: 1.5;
+    }
+
+    body::before {
+      content: "";
+      position: fixed;
+      inset: 0;
+      pointer-events: none;
+      opacity: 0.35;
+      background-image: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%232f6b4f' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+      z-index: 0;
+    }
+
+    .page {
+      position: relative;
+      z-index: 1;
+      width: min(1100px, calc(100% - 2rem));
+      margin: 0 auto;
+      padding: 2.5rem 0 4rem;
+    }
+
+    /* —— Hero —— */
+    .hero {
+      margin-bottom: 2.25rem;
+      animation: rise 0.7s ease-out both;
+    }
+
+    .brand {
+      font-family: var(--font-display);
+      font-size: clamp(2.4rem, 6vw, 3.75rem);
+      font-weight: 700;
+      line-height: 1.05;
+      letter-spacing: -0.02em;
+      color: var(--accent-deep);
+      margin: 0 0 0.75rem;
+    }
+
+    .tagline {
+      font-size: clamp(1.05rem, 2.2vw, 1.25rem);
+      color: var(--ink-muted);
+      max-width: 36rem;
+      margin: 0 0 0.85rem;
+    }
+
+    .disclaimer {
+      display: inline-block;
+      font-size: 0.9rem;
+      color: var(--slate);
+      border-left: 3px solid var(--accent);
+      padding-left: 0.75rem;
+      margin: 0;
+      max-width: 40rem;
+    }
+
+    /* —— Tool —— */
+    .tool {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 1.5rem;
+      align-items: start;
+      animation: rise 0.7s ease-out 0.12s both;
+    }
+
+    @media (min-width: 860px) {
+      .tool {
+        grid-template-columns: minmax(0, 1fr) minmax(0, 1.05fr);
+        gap: 2rem;
+      }
+    }
+
+    .panel {
+      background: rgba(255, 255, 255, 0.72);
+      backdrop-filter: blur(8px);
+      border: 1px solid var(--line);
+      border-radius: var(--radius);
+      box-shadow: var(--shadow);
+      padding: 1.5rem 1.4rem 1.6rem;
+    }
+
+    .panel h2 {
+      font-family: var(--font-display);
+      font-size: 1.35rem;
+      font-weight: 600;
+      margin: 0 0 1.1rem;
+      color: var(--ink);
+    }
+
+    .field {
+      margin-bottom: 1rem;
+    }
+
+    .field label {
+      display: block;
+      font-size: 0.92rem;
+      font-weight: 600;
+      margin-bottom: 0.35rem;
+      color: var(--ink);
+    }
+
+    .field .hint {
+      display: block;
+      font-size: 0.8rem;
+      font-weight: 400;
+      color: var(--ink-muted);
+      margin-top: 0.15rem;
+    }
+
+    .field input {
+      width: 100%;
+      font-family: inherit;
+      font-size: 1.05rem;
+      padding: 0.65rem 0.8rem;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: #fff;
+      color: var(--ink);
+      transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .field input:focus {
+      outline: none;
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px rgba(47, 107, 79, 0.18);
+    }
+
+    .row-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.85rem;
+    }
+
+    details.advanced {
+      margin-top: 0.5rem;
+      border-top: 1px solid var(--line);
+      padding-top: 0.85rem;
+    }
+
+    details.advanced summary {
+      cursor: pointer;
+      font-weight: 600;
+      color: var(--slate);
+      list-style: none;
+      display: flex;
+      align-items: center;
+      gap: 0.4rem;
+      user-select: none;
+    }
+
+    details.advanced summary::-webkit-details-marker {
+      display: none;
+    }
+
+    details.advanced summary::before {
+      content: "";
+      width: 0.45rem;
+      height: 0.45rem;
+      border-right: 2px solid var(--slate);
+      border-bottom: 2px solid var(--slate);
+      transform: rotate(-45deg);
+      transition: transform 0.2s ease;
+    }
+
+    details.advanced[open] summary::before {
+      transform: rotate(45deg);
+    }
+
+    details.advanced .advanced-body {
+      margin-top: 1rem;
+      animation: fadeSlide 0.35s ease both;
+    }
+
+    /* —— Results —— */
+    .results {
+      position: relative;
+      overflow: hidden;
+    }
+
+    .results::before {
+      content: "";
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--accent), var(--slate));
+    }
+
+    .results-status {
+      font-size: 0.9rem;
+      color: var(--ink-muted);
+      margin: -0.4rem 0 1rem;
+      min-height: 1.35em;
+    }
+
+    .results-status.warn {
+      color: var(--warn);
+      font-weight: 600;
+    }
+
+    .metric-grid {
+      display: grid;
+      gap: 0.85rem;
+    }
+
+    .metric {
+      background: linear-gradient(135deg, rgba(200, 224, 210, 0.45), rgba(243, 246, 242, 0.9));
+      border: 1px solid var(--line);
+      border-radius: 10px;
+      padding: 0.95rem 1rem;
+      transition: transform 0.25s ease, opacity 0.25s ease;
+    }
+
+    .metric.pulse {
+      animation: pulseSoft 0.45s ease;
+    }
+
+    .metric .label {
+      font-size: 0.78rem;
+      font-weight: 600;
+      text-transform: uppercase;
+      letter-spacing: 0.04em;
+      color: var(--ink-muted);
+      margin-bottom: 0.35rem;
+    }
+
+    .metric .value {
+      font-family: var(--font-display);
+      font-size: clamp(1.35rem, 3vw, 1.7rem);
+      font-weight: 700;
+      color: var(--accent-deep);
+      line-height: 1.15;
+    }
+
+    .metric .sub {
+      font-size: 0.88rem;
+      color: var(--ink-muted);
+      margin-top: 0.3rem;
+    }
+
+    .scale-block {
+      margin-top: 1.15rem;
+      padding-top: 1rem;
+      border-top: 1px solid var(--line);
+    }
+
+    .scale-block h3 {
+      font-size: 0.85rem;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      color: var(--slate);
+      margin: 0 0 0.75rem;
+    }
+
+    .scale-row {
+      display: grid;
+      grid-template-columns: 1fr;
+      gap: 0.65rem;
+    }
+
+    @media (min-width: 480px) {
+      .scale-row {
+        grid-template-columns: 1fr 1fr;
+      }
+    }
+
+    .scale-item {
+      padding: 0.75rem 0.85rem;
+      background: #fff;
+      border-radius: 8px;
+      border: 1px solid var(--line);
+    }
+
+    .scale-item .k {
+      font-size: 0.8rem;
+      color: var(--ink-muted);
+      font-weight: 600;
+    }
+
+    .scale-item .v {
+      font-size: 1.05rem;
+      font-weight: 700;
+      color: var(--ink);
+      margin-top: 0.15rem;
+    }
+
+    .assumptions {
+      margin-top: 1.25rem;
+      font-size: 0.82rem;
+      color: var(--ink-muted);
+      line-height: 1.45;
+    }
+
+    .assumptions strong {
+      color: var(--ink);
+      font-weight: 600;
+    }
+
+    footer {
+      margin-top: 2.5rem;
+      font-size: 0.85rem;
+      color: var(--ink-muted);
+      text-align: center;
+      animation: rise 0.7s ease-out 0.22s both;
+    }
+
+    @keyframes rise {
+      from {
+        opacity: 0;
+        transform: translateY(14px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes fadeSlide {
+      from {
+        opacity: 0;
+        transform: translateY(-6px);
+      }
+      to {
+        opacity: 1;
+        transform: translateY(0);
+      }
+    }
+
+    @keyframes pulseSoft {
+      0% {
+        transform: scale(1);
+      }
+      40% {
+        transform: scale(1.015);
+      }
+      100% {
+        transform: scale(1);
+      }
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      *,
+      *::before,
+      *::after {
+        animation: none !important;
+        transition: none !important;
+      }
+    }
+  </style>
+</head>
+<body>
+  <main class="page">
+    <header class="hero">
+      <h1 class="brand">Dos d’âne carbone</h1>
+      <p class="tagline">
+        Calculez l’énergie et le CO₂ dus à la réaccélération après un dos d’âne.
+      </p>
+      <p class="disclaimer">
+        Estimation basée sur le parc automobile français moyen (masse, rendement thermique, facteur CO₂).
+      </p>
+    </header>
+
+    <div class="tool">
+      <section class="panel" aria-labelledby="form-title">
+        <h2 id="form-title">Paramètres</h2>
+        <form id="calc-form" novalidate>
+          <div class="row-2">
+            <div class="field">
+              <label for="v1">Vitesse avant <span class="hint">km/h — à laquelle on ralentit</span></label>
+              <input type="number" id="v1" name="v1" min="0" step="any" value="30" required />
+            </div>
+            <div class="field">
+              <label for="v2">Vitesse après <span class="hint">km/h — à laquelle on remonte</span></label>
+              <input type="number" id="v2" name="v2" min="0" step="any" value="50" required />
+            </div>
+          </div>
+          <div class="field">
+            <label for="vehicles">Véhicules par jour</label>
+            <input type="number" id="vehicles" name="vehicles" min="0" step="1" value="2000" required />
+          </div>
+
+          <details class="advanced">
+            <summary>Paramètres avancés</summary>
+            <div class="advanced-body">
+              <div class="field">
+                <label for="mass">Masse moyenne du véhicule <span class="hint">kg — défaut 1450</span></label>
+                <input type="number" id="mass" name="mass" min="1" step="any" value="1450" />
+              </div>
+              <div class="field">
+                <label for="efficiency">Rendement moteur <span class="hint">% — défaut 28</span></label>
+                <input type="number" id="efficiency" name="efficiency" min="1" max="100" step="any" value="28" />
+              </div>
+            </div>
+          </details>
+        </form>
+      </section>
+
+      <section class="panel results" aria-labelledby="results-title" aria-live="polite">
+        <h2 id="results-title">Résultats</h2>
+        <p class="results-status" id="status"></p>
+
+        <div class="metric-grid" id="per-vehicle">
+          <div class="metric" data-metric>
+            <div class="label">Par véhicule</div>
+            <div class="value" id="pv-energy">—</div>
+            <div class="sub" id="pv-detail">Énergie cinétique supplémentaire</div>
+          </div>
+          <div class="metric" data-metric>
+            <div class="label">Carburant &amp; CO₂ / véhicule</div>
+            <div class="value" id="pv-fuel">—</div>
+            <div class="sub" id="pv-co2">—</div>
+          </div>
+        </div>
+
+        <div class="scale-block">
+          <h3>Totaux</h3>
+          <div class="scale-row">
+            <div class="scale-item">
+              <div class="k">Par jour</div>
+              <div class="v" id="day-fuel">—</div>
+              <div class="sub" id="day-co2" style="font-size:0.88rem;color:var(--ink-muted);margin-top:0.2rem"></div>
+            </div>
+            <div class="scale-item">
+              <div class="k">Par an (× 365)</div>
+              <div class="v" id="year-fuel">—</div>
+              <div class="sub" id="year-co2" style="font-size:0.88rem;color:var(--ink-muted);margin-top:0.2rem"></div>
+            </div>
+          </div>
+        </div>
+
+        <p class="assumptions">
+          <strong>Hypothèses&nbsp;:</strong>
+          contenu énergétique carburant 9,7&nbsp;kWh/L ·
+          émissions 2,4&nbsp;kg&nbsp;CO₂/L ·
+          modèle = énergie cinétique à récupérer / rendement moteur.
+        </p>
+      </section>
+    </div>
+
+    <footer>
+      Outil pédagogique — ne remplace pas une étude de trafic ou un bilan ACV.
+    </footer>
+  </main>
+
+  <script>
+    (function () {
+      const FUEL_KWH_PER_L = 9.7;
+      const CO2_KG_PER_L = 2.4;
+      const J_PER_KWH = 3.6e6;
+
+      const els = {
+        v1: document.getElementById("v1"),
+        v2: document.getElementById("v2"),
+        vehicles: document.getElementById("vehicles"),
+        mass: document.getElementById("mass"),
+        efficiency: document.getElementById("efficiency"),
+        status: document.getElementById("status"),
+        pvEnergy: document.getElementById("pv-energy"),
+        pvDetail: document.getElementById("pv-detail"),
+        pvFuel: document.getElementById("pv-fuel"),
+        pvCo2: document.getElementById("pv-co2"),
+        dayFuel: document.getElementById("day-fuel"),
+        dayCo2: document.getElementById("day-co2"),
+        yearFuel: document.getElementById("year-fuel"),
+        yearCo2: document.getElementById("year-co2"),
+        metrics: document.querySelectorAll("[data-metric]"),
+      };
+
+      function formatNumber(n, digits) {
+        if (!Number.isFinite(n)) return "—";
+        return n.toLocaleString("fr-FR", {
+          minimumFractionDigits: digits,
+          maximumFractionDigits: digits,
+        });
+      }
+
+      function formatEnergy(joules) {
+        const kWh = joules / J_PER_KWH;
+        if (kWh >= 1) {
+          return formatNumber(kWh, 2) + " kWh";
+        }
+        if (joules >= 1000) {
+          return formatNumber(joules / 1000, 1) + " kJ";
+        }
+        return formatNumber(joules, 0) + " J";
+      }
+
+      function formatLitres(l) {
+        if (l >= 100) return formatNumber(l, 0) + " L";
+        if (l >= 1) return formatNumber(l, 2) + " L";
+        if (l >= 0.01) return formatNumber(l, 3) + " L";
+        return formatNumber(l * 1000, 1) + " mL";
+      }
+
+      function formatCo2(kg) {
+        if (kg >= 1000) return formatNumber(kg / 1000, 2) + " t CO₂";
+        if (kg >= 1) return formatNumber(kg, 2) + " kg CO₂";
+        return formatNumber(kg * 1000, 0) + " g CO₂";
+      }
+
+      function clearResults(message, isWarn) {
+        els.status.textContent = message || "";
+        els.status.classList.toggle("warn", Boolean(isWarn));
+        els.pvEnergy.textContent = "—";
+        els.pvDetail.textContent = "Énergie cinétique supplémentaire";
+        els.pvFuel.textContent = "—";
+        els.pvCo2.textContent = "—";
+        els.dayFuel.textContent = "—";
+        els.dayCo2.textContent = "";
+        els.yearFuel.textContent = "—";
+        els.yearCo2.textContent = "";
+      }
+
+      function pulseMetrics() {
+        els.metrics.forEach(function (el) {
+          el.classList.remove("pulse");
+          void el.offsetWidth;
+          el.classList.add("pulse");
+        });
+      }
+
+      function calculate() {
+        const v1Kmh = parseFloat(els.v1.value);
+        const v2Kmh = parseFloat(els.v2.value);
+        const vehicles = parseFloat(els.vehicles.value);
+        const mass = parseFloat(els.mass.value);
+        const efficiencyPct = parseFloat(els.efficiency.value);
+
+        if (
+          ![v1Kmh, v2Kmh, vehicles, mass, efficiencyPct].every(Number.isFinite) ||
+          v1Kmh < 0 ||
+          v2Kmh < 0 ||
+          vehicles < 0 ||
+          mass <= 0 ||
+          efficiencyPct < 1 ||
+          efficiencyPct > 100
+        ) {
+          clearResults("Vérifiez les valeurs saisies (nombres positifs, rendement entre 1 et 100 %).", true);
+          return;
+        }
+
+        if (v2Kmh <= v1Kmh) {
+          clearResults(
+            "Pas d’énergie supplémentaire dans ce modèle : la vitesse après doit être supérieure à la vitesse avant.",
+            true
+          );
+          return;
+        }
+
+        const v1 = v1Kmh / 3.6;
+        const v2 = v2Kmh / 3.6;
+        const eta = efficiencyPct / 100;
+
+        const eKinJ = 0.5 * mass * (v2 * v2 - v1 * v1);
+        const eFuelJ = eKinJ / eta;
+        const litres = eFuelJ / J_PER_KWH / FUEL_KWH_PER_L;
+        const co2 = litres * CO2_KG_PER_L;
+
+        const dayLitres = litres * vehicles;
+        const dayCo2 = co2 * vehicles;
+        const yearLitres = dayLitres * 365;
+        const yearCo2 = dayCo2 * 365;
+
+        els.status.textContent = "";
+        els.status.classList.remove("warn");
+
+        els.pvEnergy.textContent = formatEnergy(eKinJ);
+        els.pvDetail.textContent =
+          formatEnergy(eFuelJ) + " d’énergie carburant (après rendement)";
+        els.pvFuel.textContent = formatLitres(litres);
+        els.pvCo2.textContent = formatCo2(co2);
+
+        els.dayFuel.textContent = formatLitres(dayLitres);
+        els.dayCo2.textContent = formatCo2(dayCo2);
+        els.yearFuel.textContent = formatLitres(yearLitres);
+        els.yearCo2.textContent = formatCo2(yearCo2);
+
+        pulseMetrics();
+      }
+
+      ["v1", "v2", "vehicles", "mass", "efficiency"].forEach(function (id) {
+        els[id].addEventListener("input", calculate);
+      });
+
+      calculate();
+    })();
+  </script>
+</body>
+</html>
